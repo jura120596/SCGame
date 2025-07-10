@@ -28,6 +28,9 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
+         
+      - name: add perms
+        run: chmod -R 777 ./gradlew
       - name: Build apk
         run: ./gradlew assembleRelease
       - name: Build AAB
