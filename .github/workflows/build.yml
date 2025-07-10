@@ -1,61 +1,67 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Build app
-
-# Controls when the workflow will run
+# На какие действия будет срабатывать данная автоматизация
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
+  # На любое изменение кода в ветке main
   push:
     branches: [ "master" ]
+
+  # На любой pull-request (предложение изменения кода) в ветке main
   pull_request:
     branches: [ "master" ]
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Также разрешаем запуск в ручном режиме
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# Здесь укзаываются действия, которые будут выполнятся. Они могут выполняться как асинхронно, так и последовательно
 jobs:
-  # This workflow contains a single job called "build"
+  # Это название задачи и её объявление
   build:
-    # The type of runner that the job will run on
+    # На какой системе будет запущена данная задача
     runs-on: ubuntu-latest
-    env:
-      SKA: ${{ secrets.SIGNING_KEY_ALIAS }}
-      SKP: ${{ secrets.SIGNING_KEY_PASSWORD }}
-      SSF: ${{ secrets.SIGNING_STORE_FILE }}
-      SSP: ${{ secrets.SIGNING_STORE_PASSWORD }}
-      STORE_NAME : "keys-store.jks"
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    # Задаём глобальные переменные, которые нам нужны из секретов или просто название файлов
+    env:
+      ENCODED_STRING: ${{ secrets.SIGNING_STORE_FILE }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+      STORE_NAME: "keystore.jks"
+
+    # Последовательные шаги для выполнения задачи
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Скачиваем в систему наш репозиторий
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+
+      # Устанавливаем Java в нашу систему
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
-          java-version: '17'
-      - name: Decode
-        run:
-          echo $SSF > keystore.txt
-          base64 -d keystore.txt > $STORE_NAME
+          java-version: 17
 
-      - name: add perms
+      # Раскодируем наш файл из секретов с хранилищем всех ключей
+      - name: Decode Keystore
+        run: |
+          echo $ENCODED_STRING > keystore-b64.txt
+          base64 -d keystore-b64.txt > $STORE_NAME
+
+        # Выдаём разрешение на впыолнение файла (иначе если делали из Windows - то файл по умолчанию не запустится)
+      - name: Grant permission for run
         run: chmod -R 777 ./gradlew
 
-      - name: Build apk
-        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME -Pandroid.injected.signing.store.password=$SSP -Pandroid.injected.signing.key.alias=$SKA -Pandroid.injected.signing.key.password=$SKP
+        # Собираем APK файл с подписью
+      - name: Build Release apk
+        run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME -Pandroid.injected.signing.store.password=$SIGNING_STORE_PASSWORD -Pandroid.injected.signing.key.alias=$SIGNING_KEY_ALIAS -Pandroid.injected.signing.key.password=$SIGNING_KEY_PASSWORD
 
-      - name: Build AAB
-        run: ./gradlew bundleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME -Pandroid.injected.signing.store.password=$SSP -Pandroid.injected.signing.key.alias=$SKA -Pandroid.injected.signing.key.password=$SKP
+        # Собираем AAB файл с подписью
+      - name: Build Release bundle
+        run: ./gradlew bundleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME -Pandroid.injected.signing.store.password=$SIGNING_STORE_PASSWORD -Pandroid.injected.signing.key.alias=$SIGNING_KEY_ALIAS -Pandroid.injected.signing.key.password=$SIGNING_KEY_PASSWORD
 
-      - uses: actions/upload-artifact@v4
+        # Загружаем наши файлики в артефакты
+      - name: Upload Release Build to Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: builds
+          name: artifacts
           path: |
             app/build/outputs/apk/release/
             app/build/outputs/bundle/release/
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
