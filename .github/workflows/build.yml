@@ -37,20 +37,20 @@ jobs:
       - name: Decode
         run:
           echo $SSF > keystore.txt
-          base64 -d keystore.txt > $STORE_NAME
+          base64 -d keystore.txt > $GITHUB_WORKSPACE/$STORE_NAME
       - name: add perms
         run: chmod -R 777 ./gradlew
 
       - name: Build apk
         run: ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=./$STORE_NAME \
+          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME \
           -Pandroid.injected.signing.store.password=$SSP \
           -Pandroid.injected.signing.key.alias=$SKA \
           -Pandroid.injected.signing.key.password=$SKP
 
       - name: Build AAB
         run: ./gradlew bundleRelease \
-          -Pandroid.injected.signing.store.file=./$STORE_NAME \
+          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME \
           -Pandroid.injected.signing.store.password=$SSP \
           -Pandroid.injected.signing.key.alias=$SKA \
           -Pandroid.injected.signing.key.password=$SKP
