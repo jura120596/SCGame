@@ -63,5 +63,5 @@ jobs:
         with:
           name: builds
           path: |
-            $GITHUB_WORKSPACE/app/build/outputs/apk/release
-            $GITHUB_WORKSPACE/app/build/outputs/bundle/release
+            android/build/outputs/apk/release
+            android/build/outputs/bundle/release
