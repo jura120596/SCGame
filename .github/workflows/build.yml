@@ -43,14 +43,14 @@ jobs:
 
       - name: Build apk
         run: ./gradlew assembleRelease \
-          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME \
+          -Pandroid.injected.signing.store.file=./$STORE_NAME \
           -Pandroid.injected.signing.store.password=$SSP \
           -Pandroid.injected.signing.key.alias=$SKA \
           -Pandroid.injected.signing.key.password=$SKP
 
       - name: Build AAB
         run: ./gradlew bundleRelease \
-          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/$STORE_NAME \
+          -Pandroid.injected.signing.store.file=./$STORE_NAME \
           -Pandroid.injected.signing.store.password=$SSP \
           -Pandroid.injected.signing.key.alias=$SKA \
           -Pandroid.injected.signing.key.password=$SKP
