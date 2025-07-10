@@ -38,7 +38,6 @@ jobs:
         run:
           echo $SSF > keystore.txt
           base64 -d keystore.txt > $STORE_NAME
-          ls $GITHUB_WORKSPACE
 
       - name: add perms
         run: chmod -R 777 ./gradlew
