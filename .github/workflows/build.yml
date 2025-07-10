@@ -63,5 +63,5 @@ jobs:
         with:
           name: artifacts
           path: |
-            app/build/outputs/apk/release/
-            app/build/outputs/bundle/release/
+            ./build/outputs/apk/release/
+            ./build/outputs/bundle/release/
