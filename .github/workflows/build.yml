@@ -24,7 +24,7 @@ jobs:
       SKP: ${{ secrets.SIGNING_KEY_PASSWORD }}
       SSF: ${{ secrets.SIGNING_STORE_FILE }}
       SSP: ${{ secrets.SIGNING_STORE_PASSWORD }}
-      STORE_NAME : "keystore.jks"
+      STORE_NAME : "keys-store.jks"
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
